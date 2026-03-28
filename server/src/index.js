@@ -1,4 +1,5 @@
 import "./load-env.js";
+import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
@@ -45,10 +46,17 @@ app.use("/api/winners", winnersRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/newsletter", newsletterRouter);
 
+function ensureJwtSecret() {
+  if (process.env.JWT_SECRET?.trim()) return;
+  process.env.JWT_SECRET = crypto.randomBytes(48).toString("base64url");
+  console.warn(
+    "[promo-server] JWT_SECRET is not set (add it in Railway → Variables). " +
+      "Using a random secret for this run — user sessions reset on every deploy/restart until you set JWT_SECRET."
+  );
+}
+
 async function main() {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("Set JWT_SECRET in .env (see .env.example)");
-  }
+  ensureJwtSecret();
   try {
     await mongoose.connect(MONGODB_URI);
     await ensureDefaultAdmin();
