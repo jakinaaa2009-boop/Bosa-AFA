@@ -4,6 +4,7 @@ import { requireAdmin } from "../middleware/requireAdmin.js";
 import { User } from "../models/User.js";
 import { Barimt } from "../models/Barimt.js";
 import { Winner } from "../models/Winner.js";
+import { publicAssetUrl } from "../publicUrl.js";
 
 export const adminRouter = Router();
 
@@ -46,7 +47,7 @@ adminRouter.get("/overview", requireAdmin, async (_req, res) => {
         id: String(d._id),
         docNumber: d.docNumber,
         price: d.price,
-        imageUrl: `/uploads/${d.imageFile}`,
+        imageUrl: publicAssetUrl(`/uploads/${d.imageFile}`),
         createdAt: d.createdAt,
         user: d.user
           ? {

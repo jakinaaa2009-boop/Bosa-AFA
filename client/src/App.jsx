@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { apiUrl } from "./api.js";
 import "./App.css";
 
 const TOKEN_KEY = "promo_auth_token";
@@ -44,7 +45,7 @@ function clearAdminToken() {
 }
 
 async function postAuth(path, body) {
-  const res = await fetch(path, {
+  const res = await fetch(apiUrl(path), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -147,7 +148,7 @@ function AdminPage() {
     if (!token) return;
     setWheelLoading(true);
     setWheelError("");
-    fetch("/api/admin/wheel", {
+    fetch(apiUrl("/api/admin/wheel"), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
@@ -182,7 +183,7 @@ function AdminPage() {
     const targetDeg = wheelSpinDeg + extraSpins * 360 + Math.floor(Math.random() * 360);
     setWheelSpinDeg(targetDeg);
 
-    const spinPromise = fetch("/api/admin/wheel/spin", {
+    const spinPromise = fetch(apiUrl("/api/admin/wheel/spin"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -220,7 +221,7 @@ function AdminPage() {
     setAdminDataLoading(true);
     setAdminDataError("");
     setAdminDataWarning("");
-    fetch("/api/admin/overview", {
+    fetch(apiUrl("/api/admin/overview"), {
       headers: { Authorization: `Bearer ${adminToken}` },
     })
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
@@ -626,7 +627,7 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/winners")
+    fetch(apiUrl("/api/winners"))
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
       .then(({ ok, data }) => {
         if (cancelled) return;
@@ -646,7 +647,7 @@ export default function App() {
     let cancelled = false;
     setDocsLoading(true);
     setDocsError(null);
-    fetch("/api/documents", {
+    fetch(apiUrl("/api/documents"), {
       headers: { Authorization: `Bearer ${session.token}` },
     })
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
@@ -700,7 +701,7 @@ export default function App() {
     }
     setDeletingId(doc.id);
     try {
-      const res = await fetch(`/api/documents/${doc.id}`, {
+      const res = await fetch(apiUrl(`/api/documents/${doc.id}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${session.token}` },
       });
@@ -740,7 +741,7 @@ export default function App() {
       fd.append("docNumber", num);
       fd.append("price", String(priceNum));
       fd.append("image", imageFile);
-      const res = await fetch("/api/documents", {
+      const res = await fetch(apiUrl("/api/documents"), {
         method: "POST",
         headers: { Authorization: `Bearer ${session.token}` },
         body: fd,

@@ -6,6 +6,7 @@ import multer from "multer";
 import mongoose from "mongoose";
 import { Barimt } from "../models/Barimt.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { publicAssetUrl } from "../publicUrl.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, "..", "..", "uploads");
@@ -43,7 +44,7 @@ function toDto(doc) {
     id: String(o._id),
     docNumber: o.docNumber,
     price: o.price,
-    imageUrl: `/uploads/${o.imageFile}`,
+    imageUrl: publicAssetUrl(`/uploads/${o.imageFile}`),
     createdAt: o.createdAt,
   };
 }
