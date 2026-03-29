@@ -1,10 +1,23 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { apiUrl } from "./api.js";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { apiUrl, publicAsset } from "./api.js";
 import "./App.css";
 
 const TOKEN_KEY = "promo_auth_token";
 const USER_KEY = "promo_auth_user";
 const ADMIN_TOKEN_KEY = "promo_admin_token";
+
+const HERO_JPG = publicAsset("image1.jpg");
+const HERO_PNG = publicAsset("image1.png");
+/** Shown when /public assets are missing (case-sensitive paths, deploy gaps, etc.). */
+const PLACEHOLDER_IMAGE = publicAsset("placeholder-media.svg");
+
+function onImageFallback(e) {
+  const el = e?.currentTarget;
+  if (!el || el.dataset.fallbackDone === "1") return;
+  el.dataset.fallbackDone = "1";
+  el.src = PLACEHOLDER_IMAGE;
+  el.alt = "";
+}
 
 function loadSession() {
   try {
@@ -602,12 +615,11 @@ export default function App() {
   const [docsError, setDocsError] = useState(null);
   const [fullViewDoc, setFullViewDoc] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-  const [heroImageSrc, setHeroImageSrc] = useState("/image1.jpg");
-  const [hiddenCarouselProducts, setHiddenCarouselProducts] = useState([]);
+  const [heroImageSrc, setHeroImageSrc] = useState(HERO_JPG);
   const [homeWinners, setHomeWinners] = useState([]);
-  const carouselProducts = Array.from({ length: 21 }, (_v, i) => `/product${i + 1}.png`);
-  const visibleCarouselProducts = carouselProducts.filter(
-    (src) => !hiddenCarouselProducts.includes(src)
+  const carouselProducts = useMemo(
+    () => Array.from({ length: 21 }, (_v, i) => publicAsset(`product${i + 1}.png`)),
+    []
   );
   const carouselTrackRef = useRef(null);
   const isAdminRoute =
@@ -845,7 +857,7 @@ export default function App() {
     }, 2800);
 
     return () => window.clearInterval(timerId);
-  }, [loggedIn, guestView, visibleCarouselProducts.length]);
+  }, [loggedIn, guestView]);
 
   const showGuestAuth = !loggedIn && guestView === "auth";
 
@@ -916,8 +928,18 @@ export default function App() {
                 <div className="guest-header-shell" aria-label="Нүүр цэс">
                   <div className="guest-header-top">
                     <div className="guest-header-left">
-                      <img src="/logo1.png" alt="Лого 1" className="guest-top-logo" />
-                      <img src="/logo2.png" alt="Лого 2" className="guest-top-logo" />
+                      <img
+                        src={publicAsset("logo1.png")}
+                        alt="Лого 1"
+                        className="guest-top-logo"
+                        onError={onImageFallback}
+                      />
+                      <img
+                        src={publicAsset("logo2.png")}
+                        alt="Лого 2"
+                        className="guest-top-logo"
+                        onError={onImageFallback}
+                      />
                     </div>
                     <div className="guest-header-right">
                       <button
@@ -962,14 +984,24 @@ export default function App() {
           <div className="home-hero-bg" aria-hidden />
           <div className="home-hero-rays" aria-hidden />
           <div className="home-hero-content">
-            <img
-              src={heroImageSrc}
-              alt="Сугалааны аян баннер"
-              className="home-board-image"
-              onError={() => {
-                if (heroImageSrc === "/image1.jpg") setHeroImageSrc("/image1.png");
-              }}
-            />
+            <div className="home-hero-banner-wrap">
+              <img
+                src={heroImageSrc}
+                alt="Сугалааны аян баннер"
+                className="home-board-image"
+                width={1200}
+                height={630}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                onError={() => {
+                  if (heroImageSrc === HERO_JPG) setHeroImageSrc(HERO_PNG);
+                  else if (heroImageSrc !== PLACEHOLDER_IMAGE) {
+                    setHeroImageSrc(PLACEHOLDER_IMAGE);
+                  }
+                }}
+              />
+            </div>
             <section id="how-to-join" className="campaign-section" aria-labelledby="how-join-title">
               <h2 id="how-join-title" className="home-prize-title">
                 Хэрхэн оролцох вэ?
@@ -977,7 +1009,12 @@ export default function App() {
               <div className="how-steps-grid">
                 <article className="how-step-card">
                   <span className="how-step-num">1</span>
-                  <img src="/product1.png" alt="" className="how-step-image" />
+                  <img
+                    src={publicAsset("product1.png")}
+                    alt=""
+                    className="how-step-image"
+                    onError={onImageFallback}
+                  />
                   <p className="how-step-title">Бүтээгдэхүүнээ авна</p>
                   <p className="how-step-text">2 эсвэл 20 ширхэг авалт хийнэ.</p>
                 </article>
@@ -988,7 +1025,10 @@ export default function App() {
                     alt=""
                     className="how-step-image"
                     onError={() => {
-                      if (heroImageSrc === "/image1.jpg") setHeroImageSrc("/image1.png");
+                      if (heroImageSrc === HERO_JPG) setHeroImageSrc(HERO_PNG);
+                      else if (heroImageSrc !== PLACEHOLDER_IMAGE) {
+                        setHeroImageSrc(PLACEHOLDER_IMAGE);
+                      }
                     }}
                   />
                   <p className="how-step-title">Баримтаа бүртгэнэ</p>
@@ -996,13 +1036,23 @@ export default function App() {
                 </article>
                 <article className="how-step-card">
                   <span className="how-step-num">3</span>
-                  <img src="/prize-ps5.png" alt="" className="how-step-image" />
+                  <img
+                    src={publicAsset("prize-ps5.png")}
+                    alt=""
+                    className="how-step-image"
+                    onError={onImageFallback}
+                  />
                   <p className="how-step-title">Баталгаат шагнал</p>
                   <p className="how-step-text">Шагналаа шууд авах боломжтой.</p>
                 </article>
                 <article className="how-step-card">
                   <span className="how-step-num">4</span>
-                  <img src="/prize-iphone17.png" alt="" className="how-step-image" />
+                  <img
+                    src={publicAsset("prize-iphone17.png")}
+                    alt=""
+                    className="how-step-image"
+                    onError={onImageFallback}
+                  />
                   <p className="how-step-title">Супер шагнал</p>
                   <p className="how-step-text">Ялагч болж том шагнал хожно.</p>
                 </article>
@@ -1018,49 +1068,55 @@ export default function App() {
               <div className="home-prize-grid">
                 <article className="home-prize-card">
                   <img
-                    src="/prize-electric-scooter.png"
+                    src={publicAsset("prize-electric-scooter.png")}
                     alt="Electric Scooter"
                     className="home-prize-image"
+                    onError={onImageFallback}
                   />
                   <p className="home-prize-label">Electric Scooter</p>
                 </article>
                 <article className="home-prize-card">
                   <img
-                    src="/prize-headphone.png"
+                    src={publicAsset("prize-headphone.png")}
                     alt="Headphone"
                     className="home-prize-image"
+                    onError={onImageFallback}
                   />
                   <p className="home-prize-label">Headphone</p>
                 </article>
                 <article className="home-prize-card">
                   <img
-                    src="/prize-ps5.png"
+                    src={publicAsset("prize-ps5.png")}
                     alt="PS5"
                     className="home-prize-image"
+                    onError={onImageFallback}
                   />
                   <p className="home-prize-label">PS5</p>
                 </article>
                 <article className="home-prize-card">
                   <img
-                    src="/prize-iphone17.png"
+                    src={publicAsset("prize-iphone17.png")}
                     alt="Iphone17"
                     className="home-prize-image"
+                    onError={onImageFallback}
                   />
                   <p className="home-prize-label">Iphone17</p>
                 </article>
                 <article className="home-prize-card">
                   <img
-                    src="/prize-jersey-argentina.png"
+                    src={publicAsset("prize-jersey-argentina.png")}
                     alt="Jersey Argentina"
                     className="home-prize-image"
+                    onError={onImageFallback}
                   />
                   <p className="home-prize-label">Jersey Argentina 20ш</p>
                 </article>
                 <article className="home-prize-card">
                   <img
-                    src="/prize-soccer-ball.png"
+                    src={publicAsset("prize-soccer-ball.png")}
                     alt="Soccer ball"
                     className="home-prize-image"
+                    onError={onImageFallback}
                   />
                   <p className="home-prize-label">Soccer ball 30ш</p>
                 </article>
@@ -1083,17 +1139,13 @@ export default function App() {
                   ‹
                 </button>
                 <div className="home-carousel-track" ref={carouselTrackRef}>
-                  {visibleCarouselProducts.map((src, index) => (
+                  {carouselProducts.map((src, index) => (
                     <article className="home-carousel-card" key={src}>
                       <img
                         src={src}
                         alt={`Урамшууллын бүтээгдэхүүн ${index + 1}`}
                         className="home-carousel-image"
-                        onError={() => {
-                          setHiddenCarouselProducts((prev) =>
-                            prev.includes(src) ? prev : [...prev, src]
-                          );
-                        }}
+                        onError={onImageFallback}
                       />
                     </article>
                   ))}
@@ -1126,15 +1178,17 @@ export default function App() {
                     {homeWinners.length ? (
                       homeWinners.map((w) => (
                         <tr key={w.id}>
-                          <td>{formatDate(w.createdAt)}</td>
-                          <td>{w.docNumber}</td>
-                          <td>{w.contact}</td>
-                          <td>{w.prize}</td>
+                          <td data-label="Огноо">{formatDate(w.createdAt)}</td>
+                          <td data-label="Баримт код">{w.docNumber}</td>
+                          <td data-label="Холбоо барих">{w.contact}</td>
+                          <td data-label="Шагнал">{w.prize}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4}>Одоогоор ялагч алга байна.</td>
+                        <td colSpan={4} className="winners-empty-cell">
+                          Одоогоор ялагч алга байна.
+                        </td>
                       </tr>
                     )}
                   </tbody>

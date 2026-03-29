@@ -1,3 +1,14 @@
+/**
+ * Files in `public/` — honors Vite `base` (subpath deploys).
+ * @param {string} relativePath e.g. "image1.jpg" or "/logo.png"
+ */
+export function publicAsset(relativePath) {
+  const name = String(relativePath ?? "").replace(/^\//, "");
+  const base = import.meta.env.BASE_URL || "/";
+  const prefix = base.endsWith("/") ? base : `${base}/`;
+  return `${prefix}${name}`;
+}
+
 const raw = (import.meta.env.VITE_API_BASE_URL ?? "").trim();
 
 /**

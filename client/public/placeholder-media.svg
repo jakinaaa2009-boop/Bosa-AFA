@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+  <rect width="120" height="120" rx="14" fill="#E8EFFF"/>
+  <rect x="18" y="22" width="84" height="56" rx="8" fill="#C9D9FF" opacity="0.85"/>
+  <circle cx="38" cy="42" r="10" fill="#7EA3FF"/>
+  <path d="M22 72h76l-14-22-18 14-12-10-32 18z" fill="#A8C4FF"/>
+  <text x="60" y="102" text-anchor="middle" fill="#3C4F8A" font-family="Segoe UI,system-ui,sans-serif" font-size="11" font-weight="700">C@03</text>
+</svg>
